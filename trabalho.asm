@@ -12,7 +12,7 @@
 		#
 		addi $sp, $sp, -20
 		la $s0, vet		# Endereço do vetor
-		lw $s1, size	# sizeTamanho do vetor em bytes
+		lw $s1, size	# Tamanho do vetor em posições
 		
 		# Corpo
 		#
@@ -22,10 +22,21 @@
 		addi $a2, $zero, 71	# Arg: ultimoValor = 71
 		jal inicializaVetor
 		
-		move $a0, $v0
-		li $v0, 1
-		syscall
-	
+		move $t0, $zero	# i = 0; índice
+		mainLacoImpressao:
+			beq $t0, $s1, mainPosLacoImpressao	# Percorre do começo ao fim do vetor
+			sll $t1, $t0, 2		# iBytes = i * 4
+			add $t2, $s0, $t1	# &vet[i] = &vet[0] + (iBytes)
+			lw $a0, 0($t2)		# Arg: a = vet[i]
+			li $v0, 1			# Instrução: imprime inteiro
+			syscall
+			li $a0, ' '			# Arg: a = ' '
+			li $v0, 11			# Instrução: imprime caractere
+			syscall
+			addi $t0, $t0, 1	# i++
+			j mainLacoImpressao
+		
+		mainPosLacoImpressao:
 		# Epílogo
 		#
 		addi $sp, $sp, 20
@@ -65,16 +76,23 @@
 	inicializaVetor:
 		# Prólogo
 		#
-		addi $sp, $sp, -20	# Ajusta a pilha
+		addi $sp, $sp, -40	# Ajusta a pilha
 		sw $a0, 0($sp)		# Salva arg: vetor
 		sw $a1, 4($sp)		# Salva arg: tamanho
 		sw $a2, 8($sp)		# Salva arg: ultimoValor
-		sw $ra, 12($sp)		# Salva endereço de retorno
+		sw $s0, 20($sp)		# Salva reg: $s0
+		sw $s1, 24($sp)		# Salva reg: $s1
+		sw $s2, 28($sp)		# Salva reg: $s2
+		sw $s3, 32($sp)		# Salva reg: $s3
+		sw $ra, 36($sp)		# Salva endereço de retorno
 		
 		# Corpo
 		#
+		move $s0, $a0	# Guarda arg: vetor
+		move $s1, $a1	# Guarda arg: tamanho
+		
 		inicializaVetorLaco:
-			ble  $a1, $zero, inicializaVetorCasoBase	# if (tamanho <= 0)... chama caso base
+			ble  $s1, $zero, inicializaVetorCasoBase	# if (tamanho <= 0)... chama caso base
 			# tamanho > 0...
 			# Chama valorAleatorio
 			move $a0, $a2			# Arg: a = ultimoValor
@@ -82,11 +100,29 @@
 			addi $a2, $zero, 97		# Arg: c = 97
 			addi $a3, $zero, 337	# Arg: d = 337
 			addi $t0, $zero, 3		# Arg: e = 3
-			sw $t0, 16($sp)			#
+			sw $t0, 16($sp)			# Guarda argumento extra na memória
 			jal valorAleatorio
-			#move $t0, $v0			# aux = valorAleatorio()
+			move $s2, $v0			# novoValor = valorAleatorio(...)
+			
+			# Preenche atual última posição do vetor
+			addi $t1, $s1, -1	# ultimaPosicao = tamanho - 1
+			sll $t2, $t1, 2		# Posição do vetor em bytes (deslocamento) = ultimaPosicao * 4
+			add $t3, $s0, $t2	# Endereço da última posição = Base do vetor + deslocamento
+			sw $s2, 0($t3)		# vetor[tamanho - 1] = novoValor
+			
+			# Prepara passo recursivo
+			move $a0, $s0			# Arg: vetor = vetor
+			move $a1, $t1			# Arg: tamanho = ultimaPosicao
+			move $a2, $s2			# Arg: ultimoValor = novoValor
+			jal inicializaVetor		# Chama função recursiva
+			move $s4, $v0			# valProxPosicao = inicializaVetor(...)
+			
+			# Prepara retorno
+			add $t4, $s2, $s4			# valorRetorno = novoValor + valProxPosicao
+			move $v0, $t4				# return valorRetorno
 			j inicializaVetorEpilogo
-		
+
+
 		inicializaVetorCasoBase:
 			move $v0, $zero	# return 0
 		
@@ -96,8 +132,12 @@
 			lw $a0, 0($sp)		# Recupera arg: vetor
 			lw $a1, 4($sp)		# Recupera arg: tamanho
 			lw $a2, 8($sp)		# Recupera arg: ultimoValor
-			lw $ra, 12($sp)		# Recupera endereço de retorno
-			addi $sp, $sp, 20	# Reajusta a pilha
+			lw $s0, 20($sp)		# Recupera reg: $s0
+			lw $s1, 24($sp)		# Recupera reg: $s1
+			lw $s2, 28($sp)		# Recupera reg: $s2
+			lw $s3, 32($sp)		# Recupera reg: $s3
+			lw $ra, 36($sp)		# Recupera endereço de retorno
+			addi $sp, $sp, 40	# Reajusta a pilha
 			jr $ra
 	# ---------- #
 	
