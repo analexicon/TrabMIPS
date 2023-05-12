@@ -28,11 +28,10 @@
 		move $a1, $s1		# Arg: tamanho = size
 		jal imprimeVetor
 		
-		# Chama troca
-		move $a0, $s0		# Arg: a = vet
-		addi $t0, $s0, 4	# segPos = vet + 4
-		move $a1, $t0		# Arg: fim = fim
-		jal troca
+		# Chama ordenaVetor
+		move $a0, $s0		# Arg: vet = vet
+		move $a1, $s1		# Arg: n = size
+		jal ordenaVetor
 		
 		# Chama imprimeVetor
 		move $a0, $s0		# Arg: vetor = vet
@@ -42,8 +41,7 @@
 		# Chama zeraVetor
 		move $a0, $s0		# Arg: inicio = &vet[0]
 		sll $t0, $s1, 2		# sizeBytes = size * 4
-		add $t1, $s0, $t0	# fim = inicio + sizeBytes
-		move $a1, $t1		# Arg: fim = fim
+		add $a1, $s0, $t0	# Arg: fim = inicio + sizeBytes
 		jal zeraVetor
 		
 		# Chama imprimeVetor
@@ -69,17 +67,95 @@
 	#
 	#
 	
+	# Função que ordena os elementos do vetor (SelectionSort)
+	# Param: int vet[] - Endereço base do vetor; int n - Tamanho do vetor em posições
+	# Retorno: void
+	ordenaVetor:
+		# Prólogo
+		#
+		addi $sp, $sp, -28	# Ajusta a pilha
+		sw $s0, 0($sp)		# Salva reg: $s0
+		sw $s1, 4($sp)		# Salva reg: $s1
+		sw $s2, 8($sp)		# Salva reg: $s2
+		sw $s3, 12($sp)		# Salva reg: $s3
+		sw $s4, 16($sp)		# Salva reg: $s4
+		sw $s5, 20($sp)		# Salva reg: $s5
+		sw $ra, 24($sp)		# Salva endereço de retorno
+		move $s0, $a0		# Salva arg: vet
+		move $s1, $a1		# Salva arg: n
+		
+		# Corpo
+		#
+		move $t0, $zero		# i = 0; índice
+		addi $s2, $s1, -1	# ultPos = n - 1
+				
+		ordenaVetorLaco1:
+			bge $s3, $s2, ordenaVetorPosLaco1	# if(i >= ultPos)... sai do laço
+			addi $s4, $s3, 1	# j = i + 1
+			move $s5, $s3		# min_idx = i
+			
+			ordenaVetorLaco2:
+				bge $s4, $s1, ordenaVetorPosLaco2	# if(j >= n)... sai do laço
+				
+				sll $t0, $s4, 2		# jBytes = j * 4
+				add $t0, $s0, $t0	# &vet[j] = &vet[0] + jBytes
+				lw $t2, 0($t0)		# auxJ = vet[j]
+				
+				sll $t1, $s5, 2		# min_idxBytes = min_idx * 4
+				add $t1, $s0, $t1	# &vet[min_idx] = &vet[0] + min_idxBytes
+				lw $t4, 0($t1)		# auxMin_idx = vet[min_idx]			
+				
+				bge $t2, $t4, ordenaVetorElse1	# if(auxJ >= auxMin_idx)... redireciona para o else
+				move $s5, $s4		# min_idx = j
+				ordenaVetorElse1:
+				# ~~~~~~~~~~ #
+				
+				addi $s4, $s4, 1	# j++
+				j ordenaVetorLaco2
+			# ~~~~~~~~~~ #
+			
+			ordenaVetorPosLaco2:
+				beq $s5, $s3, ordenaVetorElse2	# if(min_idx == i)... redireciona para o else
+				# Chama função troca
+				sll $t2, $s5, 2		# min_idxBytes = min_idx * 4
+				add $a0, $s0, $t2	# Arg: inicio = &vet[min_idx] = &vet[0] + min_idxBytes
+				sll $t3, $s3, 2		# iBytes = i * 4
+				add $a1, $s0, $t3	# Arg: fim = &vet[i] = &vet[0] + iBytes
+				jal troca
+				ordenaVetorElse2:
+				# ~~~~~~~~~~ #
+			
+				addi $s3, $s3, 1	# i++
+				j ordenaVetorLaco1
+		# ~~~~~~~~~~ #
+		
+		ordenaVetorPosLaco1:		
+		# Epílogo
+		#
+		lw $s0, 0($sp)		# Recupera reg: $s0
+		lw $s1, 4($sp)		# Recupera reg: $s1
+		lw $s2, 8($sp)		# Recupera reg: $s2
+		lw $s3, 12($sp)		# Recupera reg: $s3
+		lw $s4, 16($sp)		# Recupera reg: $s4
+		lw $s5, 20($sp)		# Recupera reg: $s5
+		lw $ra, 24($sp)		# Recupera endereço de retorno
+		addi $sp, $sp, 28	# Reajusta pilha
+		jr $ra	
+	# ---------- #
+	
 	# Função que troca os valores entre duas posições do vetor
 	# Param: int *a - Endereço da priemira posição; int *b - Endereço da segunda posição
 	# Retorno: void
 	troca:
 		# Corpo
 		#
+		beq $a0, $a1, trocaElse
 		lw $t0, 0($a0)	# auxA = *a
 		lw $t1, 0($a1)	# auxB = *b
 		sw $t1, 0($a0)	# *a = auxB
 		sw $t0, 0($a1)	# *b = auxA
 
+		trocaElse:
 		# Epílogo
 		#
 		jr $ra	
