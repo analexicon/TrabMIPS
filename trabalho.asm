@@ -3,6 +3,7 @@
 	vet:	# Declaração do vetor
 		.align 2	# Tamanho de cada elemento
 		.space 80	# Quantidade de bytes de espaço alocados (20 espaços de 4 bytes)
+	soma: .asciiz "Soma: "
 
 .text	# Área para instruções do programa
 
@@ -10,7 +11,6 @@
 	.main
 		# Prólogo
 		#
-		addi $sp, $sp, -20
 		la $s0, vet		# Endereço do vetor
 		lw $s1, size	# Tamanho do vetor em posições
 		
@@ -20,16 +20,24 @@
 		move $a0, $s0		# Arg: vetor = vet
 		move $a1, $s1		# Arg: tamanho = size
 		addi $a2, $zero, 71	# Arg: ultimoValor = 71
-		jal inicializaVetor
+		jal inicializaVetor	
+		move $s2, $v0		# soma = inicializaVetor(...)
 		
 		# Chama imprimeVetor
 		move $a0, $s0		# Arg: vetor = vet
 		move $a1, $s1		# Arg: tamanho = size
 		jal imprimeVetor
 
+		# Imprime soma
+		la $a0, soma	# Arg: a = "Soma: "
+		li $v0, 4		# Instrução: imprime string
+		syscall			
+		move $a0, $s2	
+		li $v0, 1		# Instrução: imprime inteiro
+		syscall
+
 		# Epílogo
 		#
-		addi $sp, $sp, 20
 		li $v0, 10	# Instrução: encerra o programa
 		syscall
 	# ========== #
