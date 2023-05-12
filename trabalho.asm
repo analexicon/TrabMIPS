@@ -1,5 +1,6 @@
 .data
 	# Área para dados na memória principal
+	#
 	
 	size: 80	# Tamanho do vetor em bytes (20 espaços de 4 bytes)
 	
@@ -9,8 +10,29 @@
 
 .text
 	# Área para instruções do programa
-	 
-	move $t0, $zero	# Índice do vetor
+	#
+	
+	# Inicializa vetor com número pseudo-aleatórios
+	# Param: $a0 - Endereço base do vetor; $a1 - Tamanho do vetor em bytes; $a2 - Último valor alteatório utilizado
+	inicializaVetor:
+		# Prólogo
+		addi $sp, $sp, -0	# Ajusta a pilha
+		sw $a0, 0($sp)
+		sw $a1, 0($sp)
+		sw $a2, 0($sp)
+		sw $ra, 0($sp)
+		
+		# Loop
+		inicializaVetorLaco1:
+			move $t0, $v0
+		
+		# Epílogo
+		inicializaVetorEpilogo:
+			lw $a0, 0($sp)
+		
+	
+	.main	# Programa principal
+		move $t0, $zero	# Índice do vetor
 	move $t1, $zero	# Valor a ser colocado no vetor
 	lw $t2, size	# Tamanho do vetor em bytes
 	
