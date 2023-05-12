@@ -12,47 +12,55 @@
 	# Área para instruções do programa
 	#
 	
+
+		
+	
 	# Inicializa vetor com número pseudo-aleatórios
 	# Param: $a0 - Endereço base do vetor; $a1 - Tamanho do vetor em bytes; $a2 - Último valor alteatório utilizado
-	inicializaVetor:
-		# Prólogo
-		addi $sp, $sp, -0	# Ajusta a pilha
-		sw $a0, 0($sp)
-		sw $a1, 0($sp)
-		sw $a2, 0($sp)
-		sw $ra, 0($sp)
+#	inicializaVetor:
+	# Prólogo
+#		addi $sp, $sp, -0	# Ajusta a pilha
+#		sw $a0, 0($sp)
+#		sw $a1, 0($sp)
+#		sw $a2, 0($sp)
+#		sw $ra, 0($sp)
 		
 		# Loop
-		inicializaVetorLaco1:
-			move $t0, $v0
+#		inicializaVetorLaco1:
+#			move $t0, $v0
 		
 		# Epílogo
-		inicializaVetorEpilogo:
-			lw $a0, 0($sp)
+#		inicializaVetorEpilogo:
+#			lw $a0, 0($sp)
 		
 	
 	.main	# Programa principal
-		move $t0, $zero	# Índice do vetor
-	move $t1, $zero	# Valor a ser colocado no vetor
-	lw $t2, size	# Tamanho do vetor em bytes
-	
-	loop:	# Preenche um vetor com o índice de cada elemento
-		beq $t0, $t2, foraDaInicializacao	# Percorre do começo ao fim do vetor
-		sw $t1, vetor($t0)	# Guarda o índice natural (0,1...n) na posição atual do vetor
-		addi $t0, $t0, 4	# Incrementa o índice de bytes
-		addi $t1, $t1, 1	# Incrementa o índice natural
-		j loop
+#		move $t0, $zero	# Índice do vetor
+#		move $t1, $zero	# Valor a ser colocado no vetor
+#		lw $t2, size	# Tamanho do vetor em bytes
 		
-	foraDaInicializacao:
-		move $t0, $zero
-		imprime:	# Imprime o vetor
-			beq $t0, $t2, foraDaImpressao	# Percorre do começo ao fim do vetor
-			lw $a0, vetor($t0)	# Carrega o elemento no registrador para impressão
-			li $v0, 1	# Instrução: imprime palavra
-			syscall
-			addi $t0, $t0, 4	# Incrementa o índice de bytes
-			j imprime
-	
-	foraDaImpressao:
-		li $v0, 10	# Instrução: encerra o programa
+		addi $a0, $zero, 10
+		addi $a1, $zero, 4
+		jal valorAleatorio
+		
+		move $a0, $v0
+		li $v0, 1
 		syscall
+		
+	
+		foraDaImpressao:
+			li $v0, 10	# Instrução: encerra o programa
+			syscall
+	
+	
+	# Funções
+	#
+		
+	# Gera número pseudo-aleatório por congruência linear
+	# Param: $a0 - 1o inteiro; $a1 - 2o inteiro; $a2 - 3o inteiro; $a3 - 4o inteiro
+	valorAleatorio:
+		#lw $t0, 16($sp)	# $t0 recebe o 5o argumento
+		mult $a0, $a1	# a * b
+		mflo $t1
+		move $v0, $t1
+		jr $ra
