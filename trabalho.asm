@@ -28,6 +28,17 @@
 		move $a1, $s1		# Arg: tamanho = size
 		jal imprimeVetor
 		
+		# Chama troca
+		move $a0, $s0		# Arg: a = vet
+		addi $t0, $s0, 4	# segPos = vet + 4
+		move $a1, $t0		# Arg: fim = fim
+		jal troca
+		
+		# Chama imprimeVetor
+		move $a0, $s0		# Arg: vetor = vet
+		move $a1, $s1		# Arg: tamanho = size
+		jal imprimeVetor
+		
 		# Chama zeraVetor
 		move $a0, $s0		# Arg: inicio = &vet[0]
 		sll $t0, $s1, 2		# sizeBytes = size * 4
@@ -57,6 +68,22 @@
 	# Funções
 	#
 	#
+	
+	# Função que troca os valores entre duas posições do vetor
+	# Param: int *a - Endereço da priemira posição; int *b - Endereço da segunda posição
+	# Retorno: void
+	troca:
+		# Corpo
+		#
+		lw $t0, 0($a0)	# auxA = *a
+		lw $t1, 0($a1)	# auxB = *b
+		sw $t1, 0($a0)	# *a = auxB
+		sw $t0, 0($a1)	# *b = auxA
+
+		# Epílogo
+		#
+		jr $ra	
+	# ---------- #
 	
 	# Função para zerar o vetor
 	# Param: int *inicio - Endereço base do vetor; int *fim - Endereço para a posição posterior ao fim do vetor
