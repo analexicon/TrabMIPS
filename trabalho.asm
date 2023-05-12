@@ -27,6 +27,18 @@
 		move $a0, $s0		# Arg: vetor = vet
 		move $a1, $s1		# Arg: tamanho = size
 		jal imprimeVetor
+		
+		# Chama zeraVetor
+		move $a0, $s0		# Arg: inicio = &vet[0]
+		sll $t0, $s1, 2		# sizeBytes = size * 4
+		add $t1, $s0, $t0	# fim = inicio + sizeBytes
+		move $a1, $t1		# Arg: fim = fim
+		jal zeraVetor
+		
+		# Chama imprimeVetor
+		move $a0, $s0		# Arg: vetor = vet
+		move $a1, $s1		# Arg: tamanho = size
+		jal imprimeVetor
 
 		# Imprime soma
 		la $a0, soma	# Arg: a = "Soma: "
@@ -46,8 +58,30 @@
 	#
 	#
 	
+	# Função para zerar o vetor
+	# Param: int *inicio - Endereço base do vetor; int *fim - Endereço para a posição posterior ao fim do vetor
+	# Retorno: void
+	zeraVetor:
+		# Prólogo
+		#
+		move $t0, $a0	# Salva arg: inicio
+		
+		# Corpo
+		#
+		zeraVetorLaco:
+			bge $t0, $a1, zeraVetorPosLaco # if(inicio >= fim)... sai do laço
+			sw $zero, 0($t0)	# *(inicio) = 0
+			addi $t0, $t0, 4	# inicio++
+			j zeraVetorLaco
+		
+		zeraVetorPosLaco:
+		# Epílogo
+		#
+		jr $ra	
+	# ---------- #
+	
 	# Função para imprimir o vetor
-	# Param: int vet[] - Endereço base do vetor, int tam - Tamanho do vetor em posições
+	# Param: int vet[] - Endereço base do vetor; int tam - Tamanho do vetor em posições
 	# Retorno: void
 	imprimeVetor:
 		# Prólogo
