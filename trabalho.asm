@@ -22,21 +22,11 @@
 		addi $a2, $zero, 71	# Arg: ultimoValor = 71
 		jal inicializaVetor
 		
-		move $t0, $zero	# i = 0; índice
-		mainLacoImpressao:
-			beq $t0, $s1, mainPosLacoImpressao	# Percorre do começo ao fim do vetor
-			sll $t1, $t0, 2		# iBytes = i * 4
-			add $t2, $s0, $t1	# &vet[i] = &vet[0] + (iBytes)
-			lw $a0, 0($t2)		# Arg: a = vet[i]
-			li $v0, 1			# Instrução: imprime inteiro
-			syscall
-			li $a0, ' '			# Arg: a = ' '
-			li $v0, 11			# Instrução: imprime caractere
-			syscall
-			addi $t0, $t0, 1	# i++
-			j mainLacoImpressao
-		
-		mainPosLacoImpressao:
+		# Chama imprimeVetor
+		move $a0, $s0		# Arg: vetor = vet
+		move $a1, $s1		# Arg: tamanho = size
+		jal imprimeVetor
+
 		# Epílogo
 		#
 		addi $sp, $sp, 20
@@ -47,9 +37,45 @@
 	# Funções
 	#
 	#
+	
+	# Função para imprimir o vetor
+	# Param: int vet[] - Endereço base do vetor, int tam - Tamanho do vetor em posições
+	# Retorno: void
+	imprimeVetor:
+		# Prólogo
+		#
+		move $t0, $a0	# Salva arg: vet
+		move $t1, $a1	# Salva arg: tam
+		move $t3, $zero	# i = 0; índice
 		
+		# Corpo
+		#
+		imprimeVetorLacoImpressao:
+			beq $t3, $t1, imprimeVetorPosLacoImpressao	# if(i == tam)... sai do laço
+			sll $t4, $t3, 2				# iBytes = i * 4
+			add $t5, $t0, $t4			# &vet[i] = &vet[0] + (iBytes)
+			lw $a0, 0($t5)				# Arg: a = vet[i]
+			li $v0, 1					# Instrução: imprime inteiro
+			syscall						
+			li $a0, ' '					# Arg: a = ' '
+			li $v0, 11					# Instrução: imprime caractere
+			syscall						
+			addi $t3, $t3, 1			# i++
+			j imprimeVetorLacoImpressao
+		
+		imprimeVetorPosLacoImpressao:
+			li $a0, '\n'	# Arg: a = '\n'
+			li $v0, 11		# Instrução: imprime caractere
+			syscall
+			
+		# Epílogo
+		#
+		jr $ra	
+	# ---------- #
+	
 	# Gera número pseudo-aleatório por congruência linear
 	# Param: int a - 1o inteiro; int b - 2o inteiro; int c - 3o inteiro; int d - 4o inteiro
+	# Retorno: inteiro aleatório
 	valorAleatorio:
 		# Prólogo
 		#
@@ -72,7 +98,8 @@
 	
 	
 	# Inicializa vetor com número pseudo-aleatórios
-	# Param: int vetor[] - Endereço base do vetor; int tamanho - Tamanho do vetor em bytes; int ultimoValor - Último valor alteatório utilizado
+	# Param: int vetor[] - Endereço base do vetor; int tamanho - Tamanho do vetor em posições; int ultimoValor - Último valor alteatório utilizado
+	# Retorno: inteiro aleatório
 	inicializaVetor:
 		# Prólogo
 		#
