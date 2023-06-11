@@ -24,27 +24,31 @@ main:
     move    $a0, $s0        # Primeiro parâmetro: vet
    	li      $a1, 20         # Segundo parâmetro: SIZE
     jal     imprimeVetor    # Chama a função imprimeVetor
-    # NOP Desnecessário, pois a próxima instrução substitui o $a0 com o mesmo valor do $s0, que foi preservado, não impactando na chamada de imprimeVetor
+    nop # NOP Necessário, pois não há garantias de o $a0 estar preservado após a chamada de imprimeVetor, então se deve defini-lo após o retorno da função
     
     # Chama a função ordenaVetor
     move    $a0, $s0        # Primeiro parâmetro: vet
-    #li      $a1, 20         # Segundo parâmetro: SIZE
-    #jal     ordenaVetor     # Chama a função ordenaVetor
+    li      $a1, 20         # Segundo parâmetro: SIZE
+    jal     ordenaVetor     # Chama a função ordenaVetor
+    nop # NOP Necessário, pois não há garantias de o $a0 estar preservado após a chamada de ordenaVetor, então se deve defini-lo após o retorno da função
     
     # Chama a função imprimeVetor
-    #move    $a0, $s0        # Primeiro parâmetro: vet
-    #li      $a1, 20         # Segundo parâmetro: SIZE
-    #jal     imprimeVetor    # Chama a função imprimeVetor
+    move    $a0, $s0        # Primeiro parâmetro: vet
+    li      $a1, 20         # Segundo parâmetro: SIZE
+    jal     imprimeVetor    # Chama a função imprimeVetor
+    nop # NOP Necessário, pois não há garantias de o $a0 estar preservado após a chamada de imprimeVetor, então se deve defini-lo após o retorno da função
     
     # Chama a função zeraVetor
-    #move    $a0, $s0        # Primeiro parâmetro: &vet[0]
-    #addi    $a1, $s0, 80    # Segundo parâmetro: &vet[20]
-    #jal     zeraVetor       # Chama a função zeraVetor
+    move    $a0, $s0        # Primeiro parâmetro: &vet[0]
+    addi    $a1, $s0, 80    # Segundo parâmetro: &vet[20]
+    jal     zeraVetor       # Chama a função zeraVetor
+    nop
     
     # Chama a função imprimeVetor
-    #move    $a0, $s0        # Primeiro parâmetro: vet
-    #li      $a1, 20         # Segundo parâmetro: SIZE
-    #jal     imprimeVetor    # Chama a função imprimeVetor
+    move    $a0, $s0        # Primeiro parâmetro: vet
+    li      $a1, 20         # Segundo parâmetro: SIZE
+    jal     imprimeVetor    # Chama a função imprimeVetor
+    nop
     
     # Impressão em tela: printf("Soma: %d\n", soma);
     li      $v0, 4          # Código 4 para impressão de string
@@ -236,12 +240,14 @@ ordenaVetor:
     ordenaFor1:
         addi    $t0, $s1, -1            # $t0 = n - 1
         bge     $s2, $t0, ordenaFim1    # Se i >= n - 1 vai para ordenaFim1
+        nop
         move    $s4, $s2                # min_idx = i
     
         # Laço interno
         addi    $s3, $s2, 1             # j = i + 1
         ordenaFor2:
             bge     $s3, $s1, ordenaFim2    # Se j >= n vai para ordenaFim2
+            nop
                     
             # Condicional dentro do lanço interno
             # Leitura do valor de vet[j]
@@ -255,15 +261,18 @@ ordenaVetor:
             lw      $t1, 0($t1)             # $t1 = vet[min_idx]
             
             bge     $t0, $t1, sortIf1Fim    # Se vet[j] >= vet[min_idx] vai para sortIf1Fim
+            nop
             move    $s4, $s3                # min_idx = j                        
             
             sortIf1Fim:
             addi    $s3, $s3, 1             # j++
             j       ordenaFor2              # Repete o laço interno
+            nop
         
         ordenaFim2:
         # Condicional após o laço interno
         beq     $s4, $s2, ordenaIfFim       # Se min_idx == i vai para ordenaIfFim
+        nop
         
         # Chama função troca
         sll     $t0, $s4, 2             # $t0 = min_idx * 4
@@ -271,10 +280,12 @@ ordenaVetor:
         sll     $t0, $s2, 2             # $t0 = i * 4
         add     $a1, $s0, $t0           # Segundo parâmetro: &vet[i]
         jal     troca
+        nop
         
         ordenaIfFim:
         addi    $s2, $s2, 1             # i++
         j       ordenaFor1              # Repete o laço externo
+        nop
     
     ordenaFim1:
     # Libera espaço na pilha
@@ -288,6 +299,7 @@ ordenaVetor:
     
     # Fim da função
     jr      $ra             # Retorna
+    nop
                   
 troca:
     # Esta função é folha
@@ -296,6 +308,7 @@ troca:
     
     # Teste da condicional
     beq     $a0, $a1, trocaFim  # Se a == b vai para trocaFim
+    nop
     
     # Troca de valores
     lw      $t0, 0($a0)     # $t0 = *a
@@ -306,6 +319,7 @@ troca:
     trocaFim:
     # Fim da função
     jr      $ra             # Retorna
+    nop
                       
                                                                                                                                                                                                                                                           
 valorAleatorio:
