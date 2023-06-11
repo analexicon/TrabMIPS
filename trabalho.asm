@@ -263,37 +263,35 @@
 		move $s0, $a0	# Guarda arg: vetor
 		move $s1, $a1	# Guarda arg: tamanho
 		
-		inicializaVetorLaco:
-			ble  $s1, $zero, inicializaVetorCasoBase	# if (tamanho <= 0)... chama caso base
-			# tamanho > 0...
-			# Chama valorAleatorio
-			move $a0, $a2			# Arg: a = ultimoValor
-			addi $a1, $zero, 47		# Arg: b = 47
-			addi $a2, $zero, 97		# Arg: c = 97
-			addi $a3, $zero, 337	# Arg: d = 337
-			addi $t0, $zero, 3		# Arg: e = 3
-			sw $t0, 16($sp)			# Guarda argumento extra na memória
-			jal valorAleatorio
-			move $s2, $v0			# novoValor = valorAleatorio(...)
-			
-			# Preenche atual última posição do vetor
-			addi $t1, $s1, -1	# ultimaPosicao = tamanho - 1
-			sll $t2, $t1, 2		# Posição do vetor em bytes (deslocamento) = ultimaPosicao * 4
-			add $t3, $s0, $t2	# Endereço da última posição = Base do vetor + deslocamento
-			sw $s2, 0($t3)		# vetor[tamanho - 1] = novoValor
-			
-			# Prepara passo recursivo
-			move $a0, $s0			# Arg: vetor = vetor
-			move $a1, $t1			# Arg: tamanho = ultimaPosicao
-			move $a2, $s2			# Arg: ultimoValor = novoValor
-			jal inicializaVetor		# Chama função recursiva
-			move $s4, $v0			# valProxPosicao = inicializaVetor(...)
-			
-			# Prepara retorno
-			add $t4, $s2, $s4			# valorRetorno = novoValor + valProxPosicao
-			move $v0, $t4				# return valorRetorno
-			j inicializaVetorEpilogo
-
+		ble  $s1, $zero, inicializaVetorCasoBase	# if (tamanho <= 0)... chama caso base
+		# tamanho > 0...
+		# Chama valorAleatorio
+		move $a0, $a2			# Arg: a = ultimoValor
+		addi $a1, $zero, 47		# Arg: b = 47
+		addi $a2, $zero, 97		# Arg: c = 97
+		addi $a3, $zero, 337	# Arg: d = 337
+		addi $t0, $zero, 3		# Arg: e = 3
+		sw $t0, 16($sp)			# Guarda argumento extra na memória
+		jal valorAleatorio
+		move $s2, $v0			# novoValor = valorAleatorio(...)
+		
+		# Preenche atual última posição do vetor
+		addi $t1, $s1, -1	# ultimaPosicao = tamanho - 1
+		sll $t2, $t1, 2		# Posição do vetor em bytes (deslocamento) = ultimaPosicao * 4
+		add $t3, $s0, $t2	# Endereço da última posição = Base do vetor + deslocamento
+		sw $s2, 0($t3)		# vetor[tamanho - 1] = novoValor
+		
+		# Prepara passo recursivo
+		move $a0, $s0			# Arg: vetor = vetor
+		move $a1, $t1			# Arg: tamanho = ultimaPosicao
+		move $a2, $s2			# Arg: ultimoValor = novoValor
+		jal inicializaVetor		# Chama função recursiva
+		move $s3, $v0			# valProxPosicao = inicializaVetor(...)
+		
+		# Prepara retorno
+		add $t4, $s2, $s3			# valorRetorno = novoValor + valProxPosicao
+		move $v0, $t4				# return valorRetorno
+		j inicializaVetorEpilogo
 
 		inicializaVetorCasoBase:
 			move $v0, $zero	# return 0
