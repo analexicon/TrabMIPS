@@ -17,17 +17,17 @@ main:
     li      $a1, 20         # Segundo parâmetro: SIZE
     li      $a2, 71         # Terceiro parâmetro: 71
     jal     inicializaVetor # Chama a função inicializaVetor
-    nop
+    nop # NOP Necessário, pois a próxima instrução precisa aguardar o valor de $v0 ser calculado, e se definir os $a da próxima chamada imprimeVetor, estes podem ser alterados dentro da inicializaVetor
     move    $s1, $v0        # Guarda o retorno da função em soma
     
     # Chama a função imprimeVetor
     move    $a0, $s0        # Primeiro parâmetro: vet
    	li      $a1, 20         # Segundo parâmetro: SIZE
     jal     imprimeVetor    # Chama a função imprimeVetor
-    nop
+    # NOP Desnecessário, pois a próxima instrução substitui o $a0 com o mesmo valor do $s0, que foi preservado, não impactando na chamada de imprimeVetor
     
     # Chama a função ordenaVetor
-    #move    $a0, $s0        # Primeiro parâmetro: vet
+    move    $a0, $s0        # Primeiro parâmetro: vet
     #li      $a1, 20         # Segundo parâmetro: SIZE
     #jal     ordenaVetor     # Chama a função ordenaVetor
     
@@ -47,15 +47,15 @@ main:
     #jal     imprimeVetor    # Chama a função imprimeVetor
     
     # Impressão em tela: printf("Soma: %d\n", soma);
-    #li      $v0, 4          # Código 4 para impressão de string
-    #la      $a0, msgSoma    # Primeiro parâmetro: endereço da string "Soma: "
-    #syscall
-    #li      $v0, 1          # Código 1 para impressão de inteiro
-    #move    $a0, $s1        # Primeiro parâmetro: soma ($s1)
-    #syscall
-    #li      $v0, 11         # Código 11 para impressão de caractere
-    #li      $a0, 10         # Primeiro parâmetro: \n (ASCII)
-    #syscall
+    li      $v0, 4          # Código 4 para impressão de string
+    la      $a0, msgSoma    # Primeiro parâmetro: endereço da string "Soma: "
+    syscall
+    li      $v0, 1          # Código 1 para impressão de inteiro
+    move    $a0, $s1        # Primeiro parâmetro: soma ($s1)
+    syscall
+    li      $v0, 11         # Código 11 para impressão de caractere
+    li      $a0, 10         # Primeiro parâmetro: \n (ASCII)
+    syscall
     
     # Libera espaço na pilha
     addi    $sp, $sp, 80    # Libera os 80 bytes alocados pela função
@@ -100,10 +100,11 @@ imprimeVetor:
     move    $s1, $a1        # Parâmetro tam salvo em $s1
     li      $s2, 0          # Variável i = 0 em $s2
     
-    imprimeLoop:
-        beq     $s2, $s1, imprimeFim    # Se i == tam vai para imprimeFim
-        nop
-        sll     $t0, $s2, 2         # $t0 = i * 4
+    # Faz a primeira verificação do índice, e a primeira antiga instrução da função
+    beq     $s2, $s1, imprimeFim    # Se i == tam vai para imprimeFim
+    # NOP Desnecessário, pois o cálculo de $t0 não impacta no epílogo do loop
+    sll     $t0, $s2, 2         # $t0 = i * 4
+    imprimeLoop: 
         add     $t0, $s0, $t0       # $t0 = &vet[i]
         
         li      $v0, 1              # Código 1 para impressão de inteiro
@@ -114,8 +115,13 @@ imprimeVetor:
         li      $a0, 32             # Primeiro parâmetro: " " (espaço)
         syscall
     
-        addi    $s2, $s2, 1         # Incremento i++
-        j       imprimeLoop         # Repete o laço
+        beq     $s2, $s1, imprimeFim    # Se i == tam vai para imprimeFim
+        # NOP Desnecessário, pois preenche o slot com a instrução addi, para incrementar o contador
+		addi    $s2, $s2, 1         # Incremento i++
+        j       imprimeLoop         # Repete o laço, caso não tenha sido deslocado
+        # NOP Desnecessário, pois preenche o slot com a primeira instrução do antigo corpo da função
+        sll     $t0, $s2, 2         # $t0 = i * 4
+        
                 
     imprimeFim:
     li      $v0, 11         # Código 11 para impressão de caractere
@@ -131,7 +137,7 @@ imprimeVetor:
     
     # Fim da função
     jr      $ra             # Retorna
-    nop
+    nop # NOP Necessário, pois não há mais instruções a serem executadas no escopo da função
     
 
 inicializaVetor:
@@ -157,7 +163,7 @@ inicializaVetor:
     # Caso base da recursão
     move    $v0, $zero      # Prepara valor de retorno 0
     ble     $s1, $zero, inicializaFim   # Se tamanho <= 0 vai para inicializaFim
-    nop
+    # NOP Desnecessário, pois a alteração do $a0 não impacta no epílogo da recursão
     
     # Passo recursivo
     # Chama a função valorAleatorio
@@ -170,7 +176,7 @@ inicializaVetor:
     li      $t0, 3          # $t0 = 3
     sw      $t0, 0($sp)     # Quinto parâmetro: 3    
     jal     valorAleatorio
-    nop
+    nop # NOP Necessário, pois $s3 e as demais instruções dependem do cálculo de $v0, além de que não se pode permitir diminuir o tamanho da pilha imediatamente, dado que o quinto parâmetro está armazenado nela
     addi    $sp, $sp, 4     # Libera 4 bytes na pilha do quinto parâmetro
     
     move    $s3, $v0        # novoValor = $v0 (retorno da função valorAleatorio)
@@ -185,7 +191,7 @@ inicializaVetor:
     addi    $a1, $s1, -1    # Segundo parâmetro: tamanho - 1
     move    $a2, $s3        # Terceiro parâmetro: novoValor
     jal     inicializaVetor
-    nop
+    nop # NOP Necessário, dado que permitir a execução da próxima instrução alteraria o valor de $v0 sem o cálculo apropriado, que é dado por inicializaVetor
     
     # Prepara valor de retorno
     add     $v0, $v0, $s3   # Prepara valor de retorno novoValor + retorno da recursão 
@@ -201,7 +207,7 @@ inicializaVetor:
     
     # Fim da função
     jr      $ra             # Retorna
-    nop
+    nop # NOP Necessário, pois não há mais instruções a serem executadas no escopo da função
     
 
 ordenaVetor:
@@ -319,6 +325,6 @@ valorAleatorio:
         
     # Fim da função
     jr      $ra             # Retorna
-    nop
+    nop # NOP Necessário, pois não há mais instruções a serem executadas no escopo da função
 
 
