@@ -17,12 +17,14 @@ main:
     li      $a1, 20         # Segundo parâmetro: SIZE
     li      $a2, 71         # Terceiro parâmetro: 71
     jal     inicializaVetor # Chama a função inicializaVetor
+    nop
     move    $s1, $v0        # Guarda o retorno da função em soma
     
     # Chama a função imprimeVetor
-    #move    $a0, $s0        # Primeiro parâmetro: vet
-    #li      $a1, 20         # Segundo parâmetro: SIZE
-    #jal     imprimeVetor    # Chama a função imprimeVetor
+    move    $a0, $s0        # Primeiro parâmetro: vet
+   	li      $a1, 20         # Segundo parâmetro: SIZE
+    jal     imprimeVetor    # Chama a função imprimeVetor
+    nop
     
     # Chama a função ordenaVetor
     #move    $a0, $s0        # Primeiro parâmetro: vet
@@ -100,6 +102,7 @@ imprimeVetor:
     
     imprimeLoop:
         beq     $s2, $s1, imprimeFim    # Se i == tam vai para imprimeFim
+        nop
         sll     $t0, $s2, 2         # $t0 = i * 4
         add     $t0, $s0, $t0       # $t0 = &vet[i]
         
@@ -128,6 +131,7 @@ imprimeVetor:
     
     # Fim da função
     jr      $ra             # Retorna
+    nop
     
 
 inicializaVetor:
@@ -153,6 +157,7 @@ inicializaVetor:
     # Caso base da recursão
     move    $v0, $zero      # Prepara valor de retorno 0
     ble     $s1, $zero, inicializaFim   # Se tamanho <= 0 vai para inicializaFim
+    nop
     
     # Passo recursivo
     # Chama a função valorAleatorio
@@ -165,6 +170,7 @@ inicializaVetor:
     li      $t0, 3          # $t0 = 3
     sw      $t0, 0($sp)     # Quinto parâmetro: 3    
     jal     valorAleatorio
+    nop
     addi    $sp, $sp, 4     # Libera 4 bytes na pilha do quinto parâmetro
     
     move    $s3, $v0        # novoValor = $v0 (retorno da função valorAleatorio)
@@ -179,6 +185,7 @@ inicializaVetor:
     addi    $a1, $s1, -1    # Segundo parâmetro: tamanho - 1
     move    $a2, $s3        # Terceiro parâmetro: novoValor
     jal     inicializaVetor
+    nop
     
     # Prepara valor de retorno
     add     $v0, $v0, $s3   # Prepara valor de retorno novoValor + retorno da recursão 
@@ -194,6 +201,7 @@ inicializaVetor:
     
     # Fim da função
     jr      $ra             # Retorna
+    nop
     
 
 ordenaVetor:
@@ -311,5 +319,6 @@ valorAleatorio:
         
     # Fim da função
     jr      $ra             # Retorna
+    nop
 
 
