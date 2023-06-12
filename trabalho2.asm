@@ -42,13 +42,13 @@ main:
     move    $a0, $s0        # Primeiro parâmetro: &vet[0]
     addi    $a1, $s0, 80    # Segundo parâmetro: &vet[20]
     jal     zeraVetor       # Chama a função zeraVetor
-    nop
+    nop # NOP Necessário, pois não há garantias de o $a0 estar preservado após a chamada de zeraVetor, então se deve defini-lo após o retorno da função
     
     # Chama a função imprimeVetor
     move    $a0, $s0        # Primeiro parâmetro: vet
     li      $a1, 20         # Segundo parâmetro: SIZE
     jal     imprimeVetor    # Chama a função imprimeVetor
-    nop
+    nop # NOP Necessário, pois não há garantias de o $v0 estar preservado após a chamada de imprimeVetor, então se deve defini-lo após o retorno da função
     
     # Impressão em tela: printf("Soma: %d\n", soma);
     li      $v0, 4          # Código 4 para impressão de string
@@ -75,16 +75,24 @@ zeraVetor:
     # O primeiro parâmetro é o ponteiro para o início do vetor
     # O segundo parâmetro é ponteiro para o fim do vetor
     
+    # Faz a execução inicial do loop
+    bge    $a0, $a1, zeraFim    # Se inicio >= fim vai para zeraFim
+    nop # NOP Necessário, pois não se pode permitir manipular a memória de um índice inválido
+    # Executa a primeira instrução do corpo da função
+    sw      $zero, 0($a0)       # Salva valor 0 no endereço apontado por inicio
+    
     zeraLoop:
-        bge    $a0, $a1, zeraFim    # Se inicio >= fim vai para zeraFim
-        sw      $zero, 0($a0)       # Salva valor 0 no endereço apontado por inicio
+        bge     $a0, $a1, zeraFim    # Se inicio >= fim vai para zeraFim
+        # NOP Desnecessário, pois se pode incrementar o contador sempre, e sua manipulação não impacta o epílogo da função
         addi    $a0, $a0, 4         # Incrementa inicio para a próxima posição
         j       zeraLoop            # Repete o laço
-    
+        # NOP Desnecessário, pois o slot é preenchido com a primeira instrução do corpo da função
+        sw      $zero, 0($a0)       # Salva valor 0 no endereço apontado por inicio
+    	
     zeraFim:
-
     # Fim da função    
     jr      $ra             # Retorna
+    nop # NOP Necessário, pois não há mais instruções a serem executadas no escopo da função
     
 
 imprimeVetor:
