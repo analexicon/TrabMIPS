@@ -164,7 +164,7 @@ inicializaVetor:
     sw      $s0, 4($sp)     # Salva $s0 na pilha
     sw      $s1, 8($sp)     # Salva $s1 na pilha
     sw      $s2, 12($sp)    # Salva $s2 na pilha
-    sw      $s3, 16($sp)    # Salva $s3 na pilha
+    sw      $s3, 16($sp)    # Salva $s3 na pilha 
 
     # Inicializa variáveis
     move    $s0, $a0        # Parâmetro vet salvo em $s0
@@ -248,14 +248,14 @@ ordenaVetor:
     ordenaFor1:
         addi    $t0, $s1, -1            # $t0 = n - 1
         bge     $s2, $t0, ordenaFim1    # Se i >= n - 1 vai para ordenaFim1
-        nop
+        nop  # NOP Necessário, pois o valor armazenado em $t0 impacta no epílogo do loop
         move    $s4, $s2                # min_idx = i
     
         # Laço interno
         addi    $s3, $s2, 1             # j = i + 1
         ordenaFor2:
             bge     $s3, $s1, ordenaFim2    # Se j >= n vai para ordenaFim2
-            nop
+            # NOP Desnecessário, pois preenche $s3 e #s1 com a instrução addi e move, respectivamente, anteriormente
                     
             # Condicional dentro do lanço interno
             # Leitura do valor de vet[j]
@@ -269,18 +269,18 @@ ordenaVetor:
             lw      $t1, 0($t1)             # $t1 = vet[min_idx]
             
             bge     $t0, $t1, sortIf1Fim    # Se vet[j] >= vet[min_idx] vai para sortIf1Fim
-            nop
+            nop  # NOP Necessário, pois os valores armazenados em $t0 e $t1 impacta no epílogo do loop
             move    $s4, $s3                # min_idx = j                        
             
             sortIf1Fim:
             addi    $s3, $s3, 1             # j++
             j       ordenaFor2              # Repete o laço interno
-            nop
+            # NOP Desnecessário, pois o fim do laço é a chamada de outro, onde  há mais instruções a serem executadas
         
         ordenaFim2:
         # Condicional após o laço interno
         beq     $s4, $s2, ordenaIfFim       # Se min_idx == i vai para ordenaIfFim
-        nop
+        # NOP Desnecessário, pois preenche $s4 e #s2 com a instrução move e li, respectivamente, anteriormente
         
         # Chama função troca
         sll     $t0, $s4, 2             # $t0 = min_idx * 4
@@ -288,12 +288,12 @@ ordenaVetor:
         sll     $t0, $s2, 2             # $t0 = i * 4
         add     $a1, $s0, $t0           # Segundo parâmetro: &vet[i]
         jal     troca
-        nop
+        # NOP Desnecessário, pois o fim do laço é a chamada de outro, onde  há mais instruções a serem executadas
         
         ordenaIfFim:
         addi    $s2, $s2, 1             # i++
         j       ordenaFor1              # Repete o laço externo
-        nop
+        # NOP Desnecessário, pois o fim do laço é a chamada de outro, onde  há mais instruções a serem executadas
     
     ordenaFim1:
     # Libera espaço na pilha
@@ -307,7 +307,7 @@ ordenaVetor:
     
     # Fim da função
     jr      $ra             # Retorna
-    nop
+    nop #NOP necessário, pois não há mais instruções a serem executadas no escopo da função
                   
 troca:
     # Esta função é folha
@@ -327,7 +327,7 @@ troca:
     trocaFim:
     # Fim da função
     jr      $ra             # Retorna
-    nop
+    nop # NOP Necessário, pois não há mais instruções a serem executadas no escopo da função
                       
                                                                                                                                                                                                                                                           
 valorAleatorio:
